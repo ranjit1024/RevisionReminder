@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const redis_1 = require("@upstash/redis");
 const prisma_1 = require("../prisma/generated/prisma");
 const express_1 = __importDefault(require("express"));
+const node_cron_1 = __importDefault(require("node-cron"));
 const prisma = new prisma_1.PrismaClient();
 const app = (0, express_1.default)();
 const port = 5032;
@@ -33,7 +34,10 @@ function GetRevisonAndPush_Queue() {
         console.log(data);
     });
 }
-GetRevisonAndPush_Queue();
+node_cron_1.default.schedule('00 5  * * * ', () => __awaiter(void 0, void 0, void 0, function* () {
+    const push = yield GetRevisonAndPush_Queue();
+    console.log(push);
+}));
 app.listen(port, () => {
     console.log(`listing on port nuumber ${port}`);
 });

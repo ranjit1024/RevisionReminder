@@ -1,6 +1,7 @@
 import { Redis } from "@upstash/redis";
 import { PrismaClient } from "../prisma/generated/prisma";
 import express, {Express} from "express"
+import corn from "node-cron"
 const prisma = new PrismaClient();
 const app:Express = express();
 const port = 5032;
@@ -17,9 +18,12 @@ async function  GetRevisonAndPush_Queue() {
   console.log(pushReminder)
   console.log(data)  
 } 
-GetRevisonAndPush_Queue()
 
 
+corn.schedule('00 5  * * * ', async()=>{
+    const push = await GetRevisonAndPush_Queue();
+    console.log(push)
+})
 
 app.listen(port, ()=>{
     console.log(`listing on port nuumber ${port}`)
