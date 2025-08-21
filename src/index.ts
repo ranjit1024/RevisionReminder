@@ -1,25 +1,26 @@
-import { PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient();
 import { Redis } from "@upstash/redis";
+import { PrismaClient } from "../prisma/generated/prisma";
+import express, {Express} from "express"
+const prisma = new PrismaClient();
+const app:Express = express();
+const port = 5032;
 const redis = Redis.fromEnv()
+async function  GetRevisonAndPush_Queue() {
+  const data = await prisma.revision.findMany({
+    select:{
+        topic:true,
+        id:true,
+        email:true
+    }
+  })
+  const pushReminder = await redis.rpush("Reminder", JSON.stringify(data))
+  console.log(pushReminder)
+  console.log(data)  
+} 
+GetRevisonAndPush_Queue()
 
-async function PutSessionReminderInquque(): Promise<{
-    time: Date;
-    id: string,
-    topic: string
-    email: string
-}[]> {
-    const revisionData = await prisma.revision.findMany({
-        select: {
-            id: true,
-            topic: true,
-            time: true,
-            email: true
-        },
 
-    });
-    redis.lpush('reminder', JSON.stringify(revisionData))
-    console.log(revisionData)
-    return revisionData;
-}
-PutSessionReminderInquque()
+
+app.listen(port, ()=>{
+    console.log(`listing on port nuumber ${port}`)
+})
